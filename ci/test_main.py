@@ -4,7 +4,7 @@ from unittest.mock import patch, MagicMock
 import os
 from main import app
 
-client = TestClient(app)
+client = TestClient(app=app)
 
 def test_home_endpoint():
     response = client.get("/")
@@ -48,6 +48,11 @@ def test_weather_endpoint_failure(mock_get):
     response = client.get("/weather?location=InvalidLocation")
     assert response.status_code == 404
 
+def test_cpu_stress_disabled():
+    # Test when stress test feature is disabled
+    response = client.get("/start_cpu_stress")
+    assert response.status_code == 403
+    assert response.json()["detail"] == "CPU stress test feature is disabled"
 
 @patch.dict(os.environ, {"STRESS_TEST_FLAG": "true"})
 def test_cpu_stress_invalid_params():
@@ -55,4 +60,13 @@ def test_cpu_stress_invalid_params():
     response = client.get("/start_cpu_stress?duration=-1&load=50")
     assert response.status_code == 400
     assert response.json()["detail"] == "Invalid duration or load parameter"
+
+@patch.dict(os.environ, {"STRESS_TEST_FLAG": "true"})
+def test_stress_status_disabled():
+    response = client.get("/stress_status")
+    assert response.status_code == 200
+    data = response.json()
+    assert not data["running"]
+    assert data["remaining_seconds"] == 0
+    assert data["iterations"] == 0
 
