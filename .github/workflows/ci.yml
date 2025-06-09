@@ -31,11 +31,15 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
+      - name: Format code with black
+        run: |
+          black main.py ci/
+
       - name: Run tests
         run: |
           pytest ci/test_main.py -v
 
-      - name: Run black formatter
+      - name: Run black formatter check
         run: |
           black --check main.py ci/
 
@@ -50,3 +54,8 @@ jobs:
       - name: Run trufflehog secret scanning
         run: |
           trufflehog --regex --entropy=False .
+
+      - name: Run pip-audit
+        run: |
+          pip install pip-audit
+          pip-audit
