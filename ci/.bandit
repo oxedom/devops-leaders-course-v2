@@ -1,0 +1,4 @@
+[bandit]
+exclude_dirs = ['tests', 'ci', '.git', '__pycache__', 'venv']
+skips = ['B101']  # Skip assert warnings in tests
+targets = ['main.py'] 
